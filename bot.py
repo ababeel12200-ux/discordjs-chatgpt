@@ -15,6 +15,8 @@ client = discord.Client(intents=intents)
 @client.event
 async def on_ready():
     print(f'Logged in as {client.user}')
+ activity = discord.Game(name="Type !ai to chat")
+    await client.change_presence(status=discord.Status.online, activity=activity)
 
 @client.event
 async def on_message(message):
