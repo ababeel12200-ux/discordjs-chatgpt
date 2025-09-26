@@ -9,7 +9,7 @@ DISCORD_BOT_TOKEN = os.getenv('DISCORD_TOKEN')  # changed this line to match you
 print(f"HF_API_TOKEN set: {HF_API_TOKEN is not None}")
 print(f"DISCORD_BOT_TOKEN set: {DISCORD_BOT_TOKEN is not None}")
 
-HF_MODEL = 'gpt2'
+HF_MODEL = "gpt2"
 HEADERS = {"Authorization": f"Bearer {HF_API_TOKEN}"}
 
 intents = discord.Intents.default()
