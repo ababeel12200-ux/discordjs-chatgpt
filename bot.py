@@ -30,7 +30,7 @@ async def on_message(message):
 
         payload = {"inputs": prompt}
         response = requests.post(
-            f"https://api-inference.huggingface.co/models/gpt2",
+            f"https://api-inference.huggingface.co/models/microsoft/DialoGPT-large",
             headers=headers,
             json=payload,
             timeout=20,
