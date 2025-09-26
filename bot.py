@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
-AI_API_KEY = os.getenv("AI_API_KEY")
+OPENAI_API_KEY = os.getenv("AI_API_KEY")
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -24,28 +24,28 @@ async def on_message(message):
     if message.content.startswith('!ai '):
         prompt = message.content[4:]
 
-        headers = {"Authorization": f"Bearer {AI_API_KEY}", "Content-Type": "application/json"}
-        json_data = {"prompt": prompt}
-        response = requests.post(
-    "https://api.openai.com/v1/chat/completions",
-    headers={
-        "Authorization": f"Bearer {AI_API_KEY}",
-        "Content-Type": "application/json",
-    },
-    json={
-        "model": "gpt-4o-mini",
-        "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 150,
-    },
-)
+        headers = {
+            "Authorization": f"Bearer {OPENAI_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        json_data = {
+            "model": "gpt-4o-mini",
+            "messages": [
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": 150,
+            "temperature": 0.7
+        }
 
-if response.status_code == 200:
-    json_resp = response.json()
-    reply = json_resp['choices'][0]['message']['content']
-else:
-    reply = "AI service error."
+        try:
+            response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=json_data)
+            if response.status_code == 200:
+                reply = response.json()['choices'][0]['message']['content']
+            else:
+                reply = f"OpenAI API error: {response.status_code}"
+        except Exception as e:
+            reply = f"Error communicating with OpenAI: {e}"
 
-await message.channel.send(reply)
-
+        await message.channel.send(reply)
 
 client.run(TOKEN)
