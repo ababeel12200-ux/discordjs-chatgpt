@@ -1,6 +1,6 @@
 import os
 import discord
-import openai
+from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -8,7 +8,8 @@ load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-openai.api_key = OPENAI_API_KEY
+# Create OpenAI client
+client_openai = OpenAI(api_key=OPENAI_API_KEY)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -17,7 +18,7 @@ client = discord.Client(intents=intents)
 @client.event
 async def on_ready():
     print(f'Logged in as {client.user}')
-    activity = discord.Game(name="Chat on politics, world events, more! Type !chat")
+    activity = discord.Game(name="Chat on politics and world events! Use !chat")
     await client.change_presence(status=discord.Status.online, activity=activity)
 
 @client.event
@@ -25,16 +26,16 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    if message.content.startswith("!a "):
+    if message.content.startswith("!chat "):
         prompt = message.content[6:]
 
         system_prompt = (
-            "You are an expert commentator on politics, world affairs, and current events. | Destinyfucks.com "
+            "You are an expert commentator on politics, world affairs, and current events. "
             "Give insightful, honest, and well-informed responses."
         )
 
         try:
-            response = openai.ChatCompletion.create(
+            response = client_openai.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -43,7 +44,7 @@ async def on_message(message):
                 max_tokens=300,
                 temperature=0.7,
             )
-            reply = response['choices'][0]['message']['content']
+            reply = response.choices[0].message.content
         except Exception as e:
             reply = f"OpenAI API error: {e}"
 
