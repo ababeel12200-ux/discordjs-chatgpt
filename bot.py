@@ -3,17 +3,18 @@ from discord.ext import commands
 import requests
 import os
 
-# Get tokens from environment variables
-HF_API_TOKEN = os.getenv('HF_API_TOKEN')  # Set this as your Railway variable for Hugging Face token
-DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')  # Set this as your Railway variable for Discord bot token
-
-HF_MODEL = 'gpt2'  # Or whichever Hugging Face model you want to use
+HF_API_TOKEN = os.getenv('HF_API_TOKEN')
+DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
+HF_MODEL = 'gpt2'
 
 HEADERS = {
     "Authorization": f"Bearer {HF_API_TOKEN}"
 }
 
-bot = commands.Bot(command_prefix='!')
+intents = discord.Intents.default()
+intents.message_content = True  # Important to receive message content for commands
+
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.event
 async def on_ready():
@@ -35,7 +36,6 @@ async def chat(ctx, *, prompt):
             text = "Sorry, I couldn't generate a response."
     else:
         text = f"API Error {response.status_code}: {response.text}"
-    
     await ctx.send(text)
 
 bot.run(DISCORD_BOT_TOKEN)
