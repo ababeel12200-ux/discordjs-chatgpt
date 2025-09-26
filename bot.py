@@ -1,15 +1,16 @@
 import os
 import discord
-from openai import OpenAI
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
+TOKEN = os.getenv("DISCORD_TOKEN")
+HF_API_TOKEN = os.getenv("HF_API_TOKEN")
+MODEL_ID = "microsoft/DialoGPT-large"  # Change if you want
 
-DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-# Create OpenAI client
-client_openai = OpenAI(api_key=OPENAI_API_KEY)
+headers = {
+    "Authorization": f"Bearer {HF_API_TOKEN}"
+}
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -18,36 +19,32 @@ client = discord.Client(intents=intents)
 @client.event
 async def on_ready():
     print(f'Logged in as {client.user}')
-    activity = discord.Game(name="Chat on politics and world events! Use !chat")
-    await client.change_presence(status=discord.Status.online, activity=activity)
 
 @client.event
 async def on_message(message):
     if message.author.bot:
         return
 
-    if message.content.startswith("!chat "):
+    if message.content.startswith("!d "):
         prompt = message.content[6:]
 
-        system_prompt = (
-            "You are an expert commentator on politics, world affairs, and current events. "
-            "Give insightful, honest, and well-informed responses."
+        payload = {"inputs": prompt}
+        response = requests.post(
+            f"https://api-inference.huggingface.co/models/{MODEL_ID}",
+            headers=headers,
+            json=payload,
+            timeout=20,
         )
 
-        try:
-            response = client_openai.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": prompt},
-                ],
-                max_tokens=300,
-                temperature=0.7,
-            )
-            reply = response.choices[0].message.content
-        except Exception as e:
-            reply = f"OpenAI API error: {e}"
+        if response.status_code == 200:
+            data = response.json()
+            if isinstance(data, dict) and 'error' in data:
+                reply = f"API error: {data['error']}"
+            else:
+                reply = data[0]["generated_text"]
+        else:
+            reply = f"HTTP error {response.status_code}"
 
-        await message.channel.send(reply[:1900])
+        await message.channel.send(reply)
 
-client.run(DISCORD_TOKEN)
+client.run(TOKEN)
