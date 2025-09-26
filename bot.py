@@ -16,7 +16,7 @@ async def on_ready():
 
 @bot.command()
 async def chat(ctx, *, prompt):
-    API_URL = "https://api.pawan.krd/v1/chat/completions"
+    API_URL = "https://freegpt.one/api/chat/completions"
     headers = {
         "Content-Type": "application/json",
         # No authorization needed for this proxy
