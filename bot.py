@@ -24,7 +24,7 @@ async def on_message(message):
 
     if message.content.startswith("!ai "):
         prompt = message.content[4:]
-        api_url = "https://api.g4f.dev/api/chat"  # Public GPT4Free endpoint (subject to availability)
+        api_url = "https://gpt4free-api.tomkob.dev/v1/chat/completions" # Public GPT4Free endpoint (subject to availability)
 
         payload = {
             "prompt": prompt,
