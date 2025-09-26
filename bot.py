@@ -25,7 +25,7 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    if message.content.startswith("!chat "):
+    if message.content.startswith("!a "):
         prompt = message.content[6:]
 
         system_prompt = (
