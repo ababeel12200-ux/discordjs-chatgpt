@@ -26,13 +26,26 @@ async def on_message(message):
 
         headers = {"Authorization": f"Bearer {AI_API_KEY}", "Content-Type": "application/json"}
         json_data = {"prompt": prompt}
-        response = requests.post("https://api.your-ai-provider.com/your-ai-endpoint", headers=headers, json=json_data)
+        response = requests.post(
+    "https://api.openai.com/v1/chat/completions",
+    headers={
+        "Authorization": f"Bearer {AI_API_KEY}",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "gpt-4o-mini",
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 150,
+    },
+)
 
-        if response.status_code == 200:
-            reply = response.json().get("text", "No response from AI.")
-        else:
-            reply = "AI service error."
+if response.status_code == 200:
+    json_resp = response.json()
+    reply = json_resp['choices'][0]['message']['content']
+else:
+    reply = "AI service error."
 
-        await message.channel.send(reply)
+await message.channel.send(reply)
+
 
 client.run(TOKEN)
