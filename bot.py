@@ -1,20 +1,23 @@
 import os
 import discord
-import requests
+import openai
 from dotenv import load_dotenv
 
 load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN")
+
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+openai.api_key = OPENAI_API_KEY
 
 intents = discord.Intents.default()
 intents.message_content = True
-
 client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
     print(f'Logged in as {client.user}')
-    activity = discord.Game(name="Type !ai to chat | Destinyfucks.com")
+    activity = discord.Game(name="Chat on politics, world events, more! Type !chat")
     await client.change_presence(status=discord.Status.online, activity=activity)
 
 @client.event
@@ -22,25 +25,28 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    if message.content.startswith("!ai "):
-        prompt = message.content[4:]
-        api_url = "https://gpt4free-api.tomkob.dev/v1/chat/completions" # Public GPT4Free endpoint (subject to availability)
+    if message.content.startswith("!chat "):
+        prompt = message.content[6:]
 
-        payload = {
-            "prompt": prompt,
-            "history": []
-        }
+        system_prompt = (
+            "You are an expert commentator on politics, world affairs, and current events. | Destinyfucks.com "
+            "Give insightful, honest, and well-informed responses."
+        )
 
         try:
-            response = requests.post(api_url, json=payload, timeout=15)
-            if response.status_code == 200:
-                data = response.json()
-                reply = data.get("response", "No response from API.")
-            else:
-                reply = f"API error: {response.status_code}"
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt},
+                ],
+                max_tokens=300,
+                temperature=0.7,
+            )
+            reply = response['choices'][0]['message']['content']
         except Exception as e:
-            reply = f"Request error: {e}"
+            reply = f"OpenAI API error: {e}"
 
-        await message.channel.send(reply)
+        await message.channel.send(reply[:1900])
 
-client.run(TOKEN)
+client.run(DISCORD_TOKEN)
