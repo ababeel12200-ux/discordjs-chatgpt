@@ -2,6 +2,7 @@ import os
 import discord
 import requests
 from dotenv import load_dotenv
+from discord.ext import tasks
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -15,7 +16,7 @@ client = discord.Client(intents=intents)
 @client.event
 async def on_ready():
     print(f'Logged in as {client.user}')
- activity = discord.Game(name="Type !ai to chat")
+    activity = discord.Game(name="Type !ai to chat")
     await client.change_presence(status=discord.Status.online, activity=activity)
 
 @client.event
