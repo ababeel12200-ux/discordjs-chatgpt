@@ -32,7 +32,7 @@ async def on_message(message):
         }
         payload = {"inputs": prompt}
 
-        api_url = "https://api-inference.huggingface.co/models/gpt2-xl"
+        api_url = "https://api-inference.huggingface.co/models/gpt2"
 
         try:
             response = requests.post(api_url, headers=headers, json=payload)
