@@ -48,10 +48,7 @@ async def chat(ctx, *, prompt):
 # Optional: help command override if needed
 @bot.command()
 async def help(ctx):
-    help_text = (
-        "Use `!chat <your message>` to chat with the bot."
-        "Example: `!chat Hello, how are you?`"
-    )
+    help_text = "Use `!chat <your message>` to chat with the bot."
     await ctx.send(help_text)
     
 bot.run(DISCORD_BOT_TOKEN)
