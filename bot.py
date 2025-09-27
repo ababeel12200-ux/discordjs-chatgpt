@@ -1,54 +1,35 @@
 import discord
-from discord.ext import commands
-import requests
-import os
+import openai
 
-DISCORD_BOT_TOKEN = os.getenv('DISCORD_TOKEN')  # Set your bot token in environment variables
+DISCORD_TOKEN = 'YOUR_DISCORD_BOT_TOKEN'
+OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY'
 
 intents = discord.Intents.default()
 intents.message_content = True
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+client = discord.Client(intents=intents)
+openai.api_key = OPENAI_API_KEY
 
-# Set bot activity status on ready
-@bot.event
+@client.event
 async def on_ready():
-    print(f'Logged in as {bot.user}')
-    activity = discord.Game(name="Destinyfucks.com")
-    await bot.change_presence(status=discord.Status.online, activity=activity)
+    print(f'Logged in as {client.user}')
 
-@bot.command()
-async def chat(ctx, *, prompt):
-    print(f"Chat command triggered with prompt: {prompt}")
-    API_URL = "https://freegpt.one/api/chat/completions"
-    headers = {
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "model": "gpt-3.5-turbo",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ]
-    }
-    try:
-        async with ctx.typing():
-            response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
-            print(f"API status code: {response.status_code}")
-            if response.status_code == 200:
-                res_json = response.json()
-                text = res_json['choices'][0]['message']['content'].strip()
-            else:
-                text = f"API Error {response.status_code}: {response.text}"
-    except Exception as e:
-        print(f"Exception during API call: {e}")
-        text = f"Error: {e}"
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
 
-    await ctx.send(text)
+    if message.content.startswith('!'):
+        user_input = message.content[6:]
+        if not user_input:
+            await message.channel.send("Type something after !chat")
+            return
 
-# Optional: help command override if needed
-@bot.command()
-async def help(ctx):
-    help_text = "Use `!chat <your message>` to chat with the bot."
-    await ctx.send(help_text)
-    
-bot.run(DISCORD_BOT_TOKEN)
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": user_input}]
+        )
+        ai_reply = response.choices[0].message.content
+        await message.channel.send(ai_reply)
+
+client.run(DISCORD_TOKEN)
