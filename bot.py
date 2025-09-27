@@ -1,8 +1,8 @@
 import discord
 import openai
 
-DISCORD_TOKEN = 'YOUR_DISCORD_BOT_TOKEN'
-OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY'
+DISCORD_TOKEN = 'DISCORD_TOKEN'
+OPENAI_API_KEY = 'OPENAI_API_KEY'
 
 intents = discord.Intents.default()
 intents.message_content = True
